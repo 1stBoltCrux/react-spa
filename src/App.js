@@ -1,16 +1,22 @@
 // Import React
 import React, { Component } from 'react';
+import { Router } from '@reach/router';
+import firebase from './Firebase'
+
 import Home from './Home';
 import Welcome from './Welcome';
-import Navigation from './Navigation'
-import { Router } from '@reach/router'
+import Navigation from './Navigation';
+import Login from './Login';
+import Register from './Register';
+import Meetings from './Meetings';
+
 
 class App extends Component {
 
   constructor(props){
     super(props);
     this.state = {
-      user: ''
+      user: 'user'
     }
   }
   render(){
@@ -20,8 +26,13 @@ class App extends Component {
           <Welcome user={this.state.user}/>
         }
         <Navigation user={this.state.user}/>
+        <Router>
+          <Home path="/" user={this.state.user}/>
+          <Login path="/login" user={this.state.user}/>
+          <Meetings path="/meetings" user={this.state.user}/>
+          <Register path="/register" user={this.state.user}/>
+        </Router>
 
-        <Home user={this.state.user}/>
       </div>
     )
   }

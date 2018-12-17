@@ -1,6 +1,6 @@
 // Import React
 import React, { Component } from 'react';
-import { Router } from '@reach/router';
+import { Router, navigate } from '@reach/router';
 import firebase from './Firebase';
 
 import Home from './Home';
@@ -16,7 +16,9 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      user: null
+      user: null,
+      displayName: null,
+      userID: null
     }
   }
 
@@ -26,6 +28,22 @@ class App extends Component {
     ref.on('value', snapshot => {
       let FBUser = snapshot.val();
       this.setState({user: FBUser})
+    })
+  }
+
+  registerUser = (userName) => {
+    firebase.auth().onAuthStateChanged(FBUser => {
+      console.log(FBUser);
+      FBUser.updateProfile({
+        displayName: userName
+      }).then(() => {
+        this.setState({
+          user: FBUser,
+          displayName: FBUser.displayName,
+          userID: FBUser.uid
+        })
+        navigate('/meetings')
+      })
     })
   }
 
@@ -40,7 +58,7 @@ class App extends Component {
           <Home path="/" user={this.state.user}/>
           <Login path="/login" user={this.state.user}/>
           <Meetings path="/meetings" user={this.state.user}/>
-          <Register path="/register" user={this.state.user}/>
+          <Register path="/register" user={this.state.user} registerUser={this.registerUser}/>
         </Router>
 
       </div>

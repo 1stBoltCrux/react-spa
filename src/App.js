@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import { Router, navigate } from '@reach/router';
 import firebase from './Firebase';
-
+import CheckIn from './CheckIn';
 import Home from './Home';
 import Welcome from './Welcome';
 import Navigation from './Navigation';
@@ -111,7 +111,8 @@ class App extends Component {
         <Router>
           <Home path="/" user={this.state.user}/>
           <Login path="/login" user={this.state.user}/>
-          <Meetings addMeeting={this.addMeeting} path="/meetings" user={this.state.user} meetings={this.state.meetings}/>
+          <Meetings addMeeting={this.addMeeting} path="/meetings" user={this.state.user} meetings={this.state.meetings} userID={this.state.userID}/>
+          <CheckIn path="/checkin/:userID/:meetingID"/>
           <Register path="/register" user={this.state.user} registerUser={this.registerUser}/>
         </Router>
 

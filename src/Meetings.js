@@ -32,7 +32,7 @@ this.setState({meetingName: ''});
 
   }
   render(){
-    const {user, meetings} = this.props;
+    const {user, meetings, userID} = this.props;
     return(
       <div className="container mt-4">
         <div className="row justify-content-center">
@@ -80,7 +80,7 @@ this.setState({meetingName: ''});
 
               {meetings && (
                 <div className="list-group list-group-flush">
-                  <MeetingList meetings={meetings}/>
+                  <MeetingList meetings={meetings} userID={userID} />
                 </div>
               )}
             </div>

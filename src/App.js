@@ -18,22 +18,49 @@ class App extends Component {
     this.state = {
       user: null,
       displayName: null,
-      userID: null
+      userID: null,
+      meetings: null,
+      howManyMeetings: null
     }
   }
 
   componentDidMount() {
-    const ref = firebase.database().ref('user');
+    firebase.auth().onAuthStateChanged(FBUser => {
+      if (FBUser) {
+        this.setState({
+          user: FBUser,
+          displayName: FBUser.displayName,
+          userID: FBUser.uid
+        })
 
-    ref.on('value', snapshot => {
-      let FBUser = snapshot.val();
-      this.setState({user: FBUser})
+        const meetingsRef = firebase.database().ref(`meetings/${FBUser.uid}`)
+
+        meetingsRef.on('value', snapshot => {
+          let meetings = snapshot.val();
+          console.log(meetings);
+          let meetingsList = [];
+
+          for(let item in meetings) {
+            meetingsList.push({
+              meetingID: item,
+              meetingName: meetings[item].meetingName
+            });
+          }
+
+          this.setState({
+            meetings: meetingsList,
+            howManyMeetings: meetingsList.length
+          })
+        })
+      } else {
+        this.setState({user: null})
+      }
     })
   }
 
   registerUser = (userName) => {
     firebase.auth().onAuthStateChanged(FBUser => {
-      console.log(FBUser);
+      console.log(FBUser.displayName);
       FBUser.updateProfile({
         displayName: userName
       }).then(() => {
@@ -47,17 +74,44 @@ class App extends Component {
     })
   }
 
+  logOutUser = (e) => {
+    e.preventDefault();
+    this.setState({
+      userID: null,
+      displayName: null,
+      user: null,
+    })
+
+    firebase.auth().signOut().then(() => {
+      navigate('/login')
+    })
+  }
+
+  addMeeting = (meetingName) => {
+    const ref = firebase
+    .database()
+    .ref(`meetings/${this.state.user.uid}`)
+    ref.push({meetingName: meetingName});
+  }
+
+
+
   render(){
     return(
       <div>
+        <Navigation
+          user={this.state.user}
+          logOutUser={this.logOutUser}/>
         {this.state.user &&
-          <Welcome user={this.state.user}/>
+          <Welcome
+            displayName={this.state.displayName}
+            logOutUser={this.logOutUser}/>
         }
-        <Navigation user={this.state.user}/>
+
         <Router>
           <Home path="/" user={this.state.user}/>
           <Login path="/login" user={this.state.user}/>
-          <Meetings path="/meetings" user={this.state.user}/>
+          <Meetings addMeeting={this.addMeeting} path="/meetings" user={this.state.user} meetings={this.state.meetings}/>
           <Register path="/register" user={this.state.user} registerUser={this.registerUser}/>
         </Router>
 

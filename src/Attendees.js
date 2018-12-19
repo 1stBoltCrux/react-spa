@@ -1,13 +1,16 @@
 import React, {Component} from 'react';
 import firebase from './Firebase';
-import AttendeesList from './AttendeesList'
+import AttendeesList from './AttendeesList';
+import {FaUndo, FaRandom} from 'react-icons/fa';
 
 
 class Attendees extends Component {
   constructor(props){
     super(props);
     this.state = {
-      displayAttendees: []
+      displayAttendees: [],
+      searchQuery: '',
+      allAttendees: []
     }
   }
 
@@ -22,16 +25,48 @@ class Attendees extends Component {
         attendeesList.push({
           attendeeID: item,
           attendeeName: attendees[item].attendeeName,
-          attendeeEmail: attendees[item].attendeeEmail
+          attendeeEmail: attendees[item].attendeeEmail,
+          star: attendees[item].star
         })
       }
       this.setState({
-        displayAttendees: attendeesList
+        displayAttendees: attendeesList,
+        allAttendees: attendeesList
       });
     })
   }
 
+  handleChange = (e) => {
+     const itemName = e.target.name;
+     const itemValue = e.target.value;
+
+
+     this.setState(
+       { [itemName]: itemValue
+       });
+   }
+
+   resetQuery = () => {
+     this.setState({
+       displayAttendees: this.state.allAttendees,
+       searchQuery: ''
+     })
+   }
+
+   chooseRandom = () => {
+     const randomAttendee = Math.floor(Math.random() * this.state.allAttendees.length)
+     this.resetQuery();
+     this.setState({
+       displayAttendees: [this.state.allAttendees[randomAttendee]]
+     })
+   }
+
   render(){
+
+    const dataFilter = item => item.attendeeName.toLowerCase().match(this.state.searchQuery.toLowerCase() ) && true;
+
+    const filteredAttendees = this.state.displayAttendees.filter(dataFilter)
+
     const {userID} = this.props
     return(
       <div className="container mt-4">
@@ -40,11 +75,34 @@ class Attendees extends Component {
             <h1 className="font-weight-light text-center">
               Attendees
             </h1>
+
+            <div className="card bg-light mb-4">
+              <div className="card-body text-center">
+                <div className="input-group input-group-lg">
+                  <input type="text" name="searchQuery" value={this.state.searchQuery} placeholder="Search Attendees" className="form-control" onChange={this.handleChange}/>
+                  <div className="input-group-append">
+                    <button className="btn btn-sm btn-outline-info"
+                      title="Pick a Random Attendee"
+                      onClick={() => this.chooseRandom()}>
+                      <FaRandom/>
+                    </button>
+                    <button className="btn btn-sm btn-outline-info"
+                      title="Reset Seach"
+                      onClick={() => this.resetQuery()}>
+                      <FaUndo/>
+                    </button>
+
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <AttendeesList
           userID={userID}
-          attendees={this.state.displayAttendees}/>
+          meetingID={this.props.meetingID}
+          adminUser={this.props.adminUser}
+          attendees={filteredAttendees}/>
       </div>
     )
   }
